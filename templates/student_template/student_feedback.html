@@ -1,0 +1,99 @@
+{% extends "student_template/base_template.html" %}
+
+{% block page_title %}
+Feedback Message
+{% endblock page_title %}
+
+{% block main_content %} 
+
+<section class="content">
+    <div class="container-fluid">
+      
+        <div class="row">
+            <div class="col-md-12">
+          <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                    <h3 class="card-title">Leave a Feedback Message</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    
+                    <form method="post" action="{% url 'student_feedback' %}">
+                        {% csrf_token %}
+                        <div class="card-body">
+                        
+                            <div class="form-group">
+                                {% if messages %}
+                                {% for message in messages %}
+                                
+                                <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
+                                
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label>Feedback Message</label>
+                                <textarea class="form-control" row="6" name="feedback_msg" required></textarea>
+                            </div>
+                           
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary btn-block">Send</button>
+                        </div>
+
+                    </form>
+                    
+
+                </div>
+          <!-- /.card -->
+
+
+
+
+          <div class="card card-primary">
+            <div class="card-header">
+            <h3 class="card-title">Feedback History</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Feedback Message</th>
+                      <th>Feedback Reply</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for row in feedback_data %}
+                          <tr>
+                              <td>{{row.id}}</td>
+                              <td>{{row.feedback}}</td>
+                              <td>{{row.feedback_reply}}</td>
+                              
+                           </tr>
+                      {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            
+
+        </div>
+            </div>
+
+
+        </div>
+
+    </div><!-- /.container-fluid -->
+  </section>
+
+
+{% endblock main_content%}
+
+{
+   

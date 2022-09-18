@@ -1,0 +1,76 @@
+{% extends "hod_template/base_template.html" %}
+
+{% block page_title %}
+Subject | subject : {{subject.subject_name}} | #ID :{{subject.id}}
+{% endblock page_title %}
+{% block main_content %} 
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Update Subject</h3>
+            </div>
+            <!-- /.card-header -->
+            <!-- form start -->
+            
+            <form role="form" action="{% url 'edit_subject' subject_id=subject.id %}" method="post">
+                {% csrf_token %}
+              <div class="card-body">
+                
+                <div class="form-group">
+                    {% if messages %}
+                      {% for message in messages %}
+                      
+                      <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
+                      
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+                <div class="form-group">
+                  <label>Subject Name</label>
+                  <input type="text" class="form-control" name="subject" value="{{subject.subject_name}}" placeholder="Enter subject" required  autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label>Course</label>
+                    <select class="form-control" required name="course">
+                        {% for course in courses %}
+                            <option value="{{ course.id }}" {% if course.id == subject.course_id.id %} selected {% endif %}> {{course.course_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Staff</label>
+                    <select class="form-control" required name="staff">
+                        {% for staff in staffs %}
+                            <option value="{{ staff.id }}" {% if staff.id == subject.staff_id.id %} selected {% endif %} > {{staff.first_name}}{{staff.last_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+
+              </div>
+              <!-- /.card-body -->
+
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-block">Update</button>
+              </div>
+            </form>
+          </div>
+          <!-- /.card -->
+
+
+
+        </div>
+        </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+
+{% endblock main_content%}
+   

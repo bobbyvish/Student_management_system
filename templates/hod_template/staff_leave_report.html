@@ -1,0 +1,75 @@
+{% extends "hod_template/base_template.html" %}
+
+{% block page_title %}
+Student Leave
+{% endblock page_title %}
+
+{% block main_content %} 
+
+<section class="content">
+    <div class="container-fluid">
+      
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                    <h3 class="card-title">Student Leave</h3>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Staff ID</th>
+                                    <th>Staff Name</th>
+                                    <th>Leave Date</th>
+                                    <th>Leave Message</th>
+                                    <th>Apply On</th>
+                                    <th>Action</th>
+                                
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves %}
+                                    <tr>
+                                        <td>{{ leave.id }}</td>
+                                        <td>{{ leave.staff_id.admin.id }}</td>
+                                        <td>{{ leave.staff_id.admin.first_name }} {{ leave.staff_id.admin.last_name }}</td>
+                                        <td>{{ leave.leave_date }}</td>
+                                        <td>{{ leave.leave_message }}</td>
+                                        <td>{{ leave.created_at }}</td>
+                                        <td>
+                                            {% if leave.leave_status == 0 %}
+                                            <a href="{% url 'staff_leave_action' leave_id=leave.id action='yes' %}" class="btn btn-success" >Approve</a>
+                                            <a class="btn btn-danger" href="{% url 'staff_leave_action' leave_id=leave.id action='no' %}" >Disapprove</a>
+                                            {% elif leave.leave_status == 1  %} 
+                                            <span class="badge bg-success">Approved</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Disapproved</span>
+                                            {% endif %}
+                                        </td>
+
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+
+                </div>
+            </div>
+
+
+        </div>
+
+    </div><!-- /.container-fluid -->
+  </section>
+
+
+{% endblock main_content%}
+
+
+
+
+
+   

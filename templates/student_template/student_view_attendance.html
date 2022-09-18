@@ -1,0 +1,140 @@
+{% extends "student_template/base_template.html" %}
+
+{% block page_title %}
+Take Attendance
+{% endblock page_title %}
+
+{% block main_content %} 
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                        <div class="card-header">
+                        <h3 class="card-title">View Attendance</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                    <form  method="post">
+                            <div class="card-body">
+                                    {% comment %} {% csrf_token %} {% endcomment %}
+                                    <div class="form-group">
+                                        {% if messages %}
+                                        {% for message in messages %}
+                                        
+                                        <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
+                                        
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Subject </label>
+                                        <select class="form-control" name="subject" id="subject">
+                                            {% for subject in subjects %}
+                                                <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Start Date</label>
+                                                    <input type="date" name="start_date" id="start_date" class="form-control">
+                                                </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>End Date</label>
+                                                <input type="date" name="end_date" id="end_date" class="form-control" >
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                <!-- /.card-body -->
+                            </div>
+                            <div class="card-footer">
+                                <button type="button" class="btn btn-primary btn-block" id="fetch_attendance">Fetch Attendance</button>
+                            </div>
+                    </form>
+                    <!-- /.card -->
+
+                </div>
+
+            
+
+                <div class="card card-primary">
+                    <div class="card-header">
+                    <h3 class="card-title">Attendance History</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                        <thead>
+                            <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                            
+                            </tr>
+                        </thead>
+                        <tbody id="attendance_history">
+                            
+                               
+                        </tbody>
+                        </table>
+                    </div>
+                    
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock main_content%}
+{% block custom_js %}
+<script>
+
+    $(document).ready(function(){
+
+        $("#fetch_attendance").click(function(){
+            var subject_id=$("#subject").val();
+            var start_date=$("#start_date").val();
+            var end_date=$("#end_date").val();
+
+            $.ajax({
+                url:"{% url 'student_view_attendance' %}",
+                type:"POST",
+                data:{subject:subject_id,start_date:start_date,end_date:end_date},
+                success:function(response){
+                    var json_data = JSON.parse(response)
+                    console.log(json_data);
+
+                    var table_data=""
+                    for (key in json_data) {
+                        table_data+="<tr><td>"+json_data[key]['attendance_date']+"</td>"
+                    
+                        if(json_data[key]['status']){
+                            table_data+="<td><span class='badge bg-success'> Present </span></td>";
+                        }
+                        else{
+                            table_data+="<td><span class='badge bg-danger'> Absent <span></td>";
+                        }
+                        table_data+="</tr>";
+                    }
+                    $("#attendance_history").html(table_data)
+                },
+                error:function(err){
+                    console.log(err);
+                }
+
+            })
+        })
+
+    })
+</script>
+{% endblock custom_js %}
+
+   

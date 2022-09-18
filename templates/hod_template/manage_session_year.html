@@ -1,0 +1,63 @@
+{% extends "hod_template/base_template.html" %}
+
+{% block page_title %}
+Manage Session
+{% endblock page_title %}
+{% block main_content %} 
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+          <!-- general form elements -->
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Manage Session Year</h3>
+            </div>
+            <!-- /.card-header -->
+            <!-- form start -->
+            
+            <form role="form" action="{% url 'manage_session' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+              <div class="card-body">
+                
+                <div class="form-group">
+                    {% if messages %}
+                      {% for message in messages %}
+                      
+                      <div class="alert alert-{{ message.tags }}" style="margin-top:10px">{{ message }}</div>
+                      
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+
+                <div class="form-group">
+                    <label>Session Start</label>
+                    <input type="date" class="form-control" required placeholder="Session Start Year" name="session_start" >
+                </div>
+                <div class="form-group">
+                    <label>Session End</label>
+                    <input type="date" class="form-control" required placeholder="Session End Year" name="session_end" >
+                </div>
+                
+
+              </div>
+              <!-- /.card-body -->
+
+              <div class="card-footer">
+                <button type="submit" class="btn btn-primary btn-block">Add</button>
+              </div>
+            </form>
+          </div>
+          <!-- /.card -->
+
+
+
+        </div>
+        </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+
+{% endblock main_content%}
+   
