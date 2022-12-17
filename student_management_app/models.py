@@ -44,6 +44,19 @@ class Staffs(models.Model):
     class Meta:
         db_table = 'staff'
 
+class RelativeStaff(models.Model):
+    id = models.AutoField(primary_key=True)
+    staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    location = models.TextField()
+    age = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
+
+    class Meta:
+        db_table = 'relative_staff'
+
 class Courses(models.Model):
     id=models.AutoField(primary_key=True)
     course_name=models.CharField(max_length=255)

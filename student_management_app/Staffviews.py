@@ -84,14 +84,14 @@ def Get_Students(request):
 
 @csrf_exempt
 def Save_Attendance_Data(request):
-    student_ids=request.POST.get('student_ids')
+    student_data=request.POST.get('student_data')
     subject_id=request.POST.get("subject_id")
     attendance_date=request.POST.get("attendance_date")
     session_year_id=request.POST.get("session_year_id")
-    print(student_ids)
+    print(student_data)
     subject_model=Subjects.objects.get(id=subject_id)
     session_model=SessionYearModel.object.get(id=session_year_id)
-    json_student=json.loads(student_ids)
+    json_student=json.loads(student_data)
     try:
         attendance=Attendance(
             subject_id=subject_model,

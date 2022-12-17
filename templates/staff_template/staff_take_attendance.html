@@ -131,7 +131,7 @@ Take Attendance
                     $.ajax({
                         url:'{% url 'save_attendance_data' %}',
                         type:'POST',
-                        data: {student_ids:student_data, attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id},
+                        data: {student_data:student_data, attendance_date:attendance_date,subject_id:subject_id,session_year_id:session_year_id},
                         success: function(response){
                             if(response == "OK"){
                                 alert('Attendance Save')

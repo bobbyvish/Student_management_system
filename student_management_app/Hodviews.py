@@ -7,33 +7,168 @@ from .models import CustomUser,Courses, FeedBackStaffs, FeedBackStudent, LeaveRe
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 import json
+from pprint import pprint
+from django.db.models import Max, F, OuterRef, Subquery, Prefetch, OuterRef, Count ,Q , Case , When ,Value , Sum
+from django.db.models.functions import Coalesce
+
+# from .models import RelativeStaff
+# def AdminHomeTest(request):
+#  
+#     # from .models import RelativeStaff
+
+#     """different query test"""
+#     latest_leave_staff=LeaveReportStaff.objects.order_by('-created_at')
+#     print("direct=================",latest_leave_staff)
+#     staff_relative=RelativeStaff.objects.order_by('-created_at')
+#     print("direct ralative============",staff_relative)
+
+#     # latest_leave_staff=LeaveReportStaff.objects.annotate(max_date=Max('created_at')).filter(created_at=F('max_date'))
+#     # print("direct=================",latest_leave_staff)
+#     # staff_relative=RelativeStaff.objects.annotate(max_date=Max('created_at')).filter(created_at=F('max_date'))
+#     # print("direct ralative============",staff_relative)
+
+#     staffs=Staffs.objects.select_related("admin").prefetch_related(
+#                                         Prefetch("leavereportstaff_set", queryset=latest_leave_staff , to_attr="leave_report")
+#                                     ).prefetch_related(
+#                                         Prefetch("relativestaff_set", queryset=staff_relative , to_attr="staff_relative")
+#                                     )
+#     for staff in staffs:
+#         print(staff.leave_report)                               
+#         print(staff.staff_relative)
+#     total_staff=[]
+#     for staff in staffs:
+#         temp={}
+#         temp["id"]=staff.id
+#         temp["address"]=staff.address
+#         temp["first_name"]=staff.admin.first_name
+#         if staff.leave_report:
+#             temp["leave_date"]=staff.leave_report[0].leave_date
+#             temp["leave_message"]=staff.leave_report[0].leave_message
+
+#         if staff.staff_relative:
+#             temp["name"]=staff.staff_relative[0].name
+#             temp["location"]=staff.staff_relative[0].location
+#             temp["age"]=staff.staff_relative[0].age
+#         total_staff.append(temp)
+    
+#     pprint(total_staff)
+#     """proper woking code """
+#     print("++++++++++++++++++++++++++++++++=======================================+++++++++++++++++++++++++++++++++")
+#     """#1"""
+
+#     latest_leave_staff=LeaveReportStaff.objects.annotate(max_date=Max('staff_id__leavereportstaff__created_at')).filter(created_at=F('max_date'))
+#     # print("+++++++++++++++++++",latest_leave_staff)
+#     staff_relative=RelativeStaff.objects.annotate(max_date=Max('staff_id__relativestaff__created_at')).filter(created_at=F('max_date'))
+#     # print("++++++++++++++++++++++++++",staff_relative)
+#     staffs=Staffs.objects.select_related("admin").prefetch_related(
+#                                         Prefetch("leavereportstaff_set", queryset=latest_leave_staff , to_attr="leave_report")
+#                                     ).prefetch_related(
+#                                         Prefetch("relativestaff_set", queryset=staff_relative , to_attr="staff_relative")
+#                                     )
+#     for staff in staffs:
+#         print(staff.leave_report)                               
+#         print(staff.staff_relative)                               
+#     total_staff=[]
+#     for staff in staffs:
+#         temp={}
+#         temp["id"]=staff.id
+#         temp["address"]=staff.address
+#         temp["first_name"]=staff.admin.first_name
+#         if staff.leave_report:
+#             temp["leave_date"]=staff.leave_report[0].leave_date
+#             temp["leave_message"]=staff.leave_report[0].leave_message
+
+#         if staff.staff_relative:
+#             temp["name"]=staff.staff_relative[0].name
+#             temp["location"]=staff.staff_relative[0].location
+#             temp["age"]=staff.staff_relative[0].age
+#         total_staff.append(temp)
+
+#     # print(total_staff)
+
+#     """ #2 """
+#     staff_data = Staffs.objects.all().select_related("admin").values("id","address","admin__first_name")
+#     leave_staff=list(LeaveReportStaff.objects.filter(created_at__in=LeaveReportStaff.objects.values('staff_id_id').annotate(createds_at=Max('created_at')).values('createds_at')).values("id","staff_id_id","leave_date","leave_message","leave_status","created_at"))
+#     staff_relative=list(RelativeStaff.objects.filter(created_at__in=RelativeStaff.objects.values('staff_id_id').annotate(createds_at=Max('created_at')).values('createds_at')).values("id","staff_id_id","name","location","age","created_at"))
+#     # pprint(staff_data)
+#     # pprint(leave_staff)
+
+#     total_staff_using_for=[]
+
+#     for staff in staff_data:
+#         temp={}
+#         temp["id"]=staff["id"]
+#         temp["address"]=staff["address"]
+#         temp["first_name"]=staff["admin__first_name"]
+        
+#         for leave in leave_staff:
+#             # print(leave_staff)
+#             if leave["staff_id_id"] == staff["id"]:
+#                 temp["leave_date"]=leave["leave_date"]
+#                 temp["leave_message"]=leave["leave_message"]
+#                 leave_staff.remove(leave)
+#                 break
+
+#         for leave in staff_relative:
+#             # print(staff_relative)
+#             if leave["staff_id_id"] == staff["id"]:
+#                 temp["name"]=leave["name"]
+#                 temp["location"]=leave["location"]
+#                 temp["age"]=leave["age"]
+#                 staff_relative.remove(leave)
+#                 break
+                
+#         total_staff_using_for.append(temp)
+
+#     combine={
+#         "total_staff_using_for" : total_staff_using_for,
+#         "total_staff" : total_staff
+#     }
+#     # pprint(staff_data.values("leavereportstaff__leave_message"))
+
+#     # return JsonResponse(combine, safe=False)
+#     return render(request, 'hod_template/test.html')
+
 
 def AdminHome(request):
-    total_students=Students.objects.all()
-    total_staffs=Staffs.objects.all()
-    total_subjects=Subjects.objects.all()
-    total_courses=Courses.objects.all()
 
+    total_courses=Courses.objects.annotate(
+                                    subjects_count=Count("subjects"),
+                                    students_count=Count("students")       
+                                )
+    
     # fetch courses and subjects 
     course_name_list=[]
     subject_count_list=[]
     student_count_list_in_course=[]
     for course in total_courses:
-        subjects=Subjects.objects.filter(course_id=course.id).count()
-        students=Students.objects.filter(course_id=course.id).count()
         course_name_list.append(course.course_name)
-        subject_count_list.append(subjects)
-        student_count_list_in_course.append(students)
+        subject_count_list.append(course.subjects_count)
+        student_count_list_in_course.append(course.students_count)
+
+    # Fetch Subjects and total_students
+    total_subjects=Subjects.objects.select_related("course_id").annotate(students_count=Count("course_id__students"))
 
     subject_list=[]
     student_count_list_in_subject=[]
     for subject in total_subjects:
-        course=Courses.objects.get(id=subject.course_id.id)
-        students=Students.objects.filter(course_id=course.id).count()
         subject_list.append(subject.subject_name)
-        student_count_list_in_subject.append(students)
+        student_count_list_in_subject.append(subject.students_count)
 
-    
+    # prefetch_related(Prefetch("admin__subjects_set__attendance_set", queryset=Attendance.objects.count() ,to_attr="attendance"))
+    # .prefetch_related(Prefetch("admin__subjects_set__attendance_set", queryset=Attendance.objects.filter(subject_id__staff_id=id) ,to_attr="atten"))
+
+    total_staffs=Staffs.objects.select_related(
+                                    "admin"
+                                ).annotate(
+                                    leaves=Count("leavereportstaff", filter=Q(leavereportstaff__leave_status=1)),
+                                    attend=Count("admin__subjects__attendance")
+                                ).order_by("attend")
+    print(total_staffs)
+    for i in total_staffs:
+        print(i.admin.username,i.attend)
+    total_staffs=Staffs.objects.all()
+
     attendance_present_list_staff=[]
     attendance_absent_list_staff=[]
     staff_name_list=[]
@@ -45,17 +180,42 @@ def AdminHome(request):
         attendance_absent_list_staff.append(leaves)
         staff_name_list.append(staff.admin.username)
 
+    print(attendance_present_list_staff)
+    print(attendance_absent_list_staff)
+    print(staff_name_list)
+
+    total_students=Students.objects.select_related("admin").prefetch_related(
+                                        "attendancereport_set"
+                                    ).values(
+                                        "attendancereport__student_id"
+                                    ).annotate(
+                                        present=Count("attendancereport", filter=Q(attendancereport__status=True)),
+                                        absent=Count("attendancereport", filter=Q(attendancereport__status=False)),
+                                    ).values("attendancereport__student_id","admin__username","present", "absent")
     
+    student_leaves=Students.objects.prefetch_related(
+                                        "leavereportstudent_set"
+                                    ).values(
+                                        "leavereportstudent__student_id"
+                                    ).annotate(
+                                        leaves=Count("leavereportstudent", filter=Q(leavereportstudent__leave_status=1))
+                                    )
+
+    # print(student_leaves)
+
+    # print(total_students)
+
     attendance_present_list_student=[]
     attendance_absent_list_student=[]
     student_name_list=[]
     for student in total_students:
-        attendance=AttendanceReport.objects.filter(student_id=student.id,status=True).count()
-        absent=AttendanceReport.objects.filter(student_id=student.id,status=False).count()
-        leaves=LeaveReportStudent.objects.filter(student_id=student.id,leave_status=1).count()
-        attendance_present_list_student.append(attendance)
-        attendance_absent_list_student.append(leaves+absent)
-        student_name_list.append(student.admin.username)
+        attendance_present_list_student.append(student["present"])
+        attendance_absent_list_student.append(student["absent"])
+        student_name_list.append(student["admin__username"])
+
+    # print(attendance_present_list_student)
+    # print(attendance_absent_list_student)
+    # print(student_name_list)
 
     context={
         "students":total_students.count(),

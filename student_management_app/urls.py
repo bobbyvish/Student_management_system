@@ -10,6 +10,11 @@ urlpatterns = [
     
     path('admin_home',Hodviews.AdminHome,name='admin_home'),
 
+    
+
+    # path('admin_home_test', Hodviews.AdminHomeTest, name='admin_home'),  #testing
+    
+
     path('add_staff',Hodviews.AddStaff,name='add_staff'),
     path('add_course',Hodviews.AddCourse,name='add_course'),
     path('add_student',Hodviews.AddStudent,name='add_student'),
