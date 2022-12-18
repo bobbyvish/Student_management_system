@@ -3,6 +3,7 @@ from django.urls import path,include
 from . import views
 from . import Hodviews,Staffviews,Studentviews
 urlpatterns = [
+    path("",views.index, name="index"),
     path('accounts/',include('django.contrib.auth.urls')),
     path('login',views.Login,name='login'),
     path('get_user_details',views.GetUserDetails,name='get_user_details'),

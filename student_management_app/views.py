@@ -5,6 +5,8 @@ from student_management_app.EmailBackEnd import EmailBackEnd
 from django.contrib.auth import login,logout
 from django.urls import reverse
 
+def index(request):
+    return HttpResponseRedirect(reverse('login'))
 
 def Login(request):
     if request.method == 'POST':
