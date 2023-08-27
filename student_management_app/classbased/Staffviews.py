@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponse,JsonResponse,HttpResponseRedirect
-from .models import CustomUser,Students,Courses,Staffs, Subjects,SessionYearModel,Attendance,AttendanceReport,LeaveReportStaff,FeedBackStaffs,StudentResult
+from student_management_app.models import CustomUser,Students,Courses,Staffs, Subjects,SessionYearModel,Attendance,AttendanceReport,LeaveReportStaff,FeedBackStaffs,StudentResult
 import json
 from django.views.decorators.csrf import csrf_exempt
 

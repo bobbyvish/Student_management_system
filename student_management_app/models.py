@@ -3,21 +3,30 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from django.utils.translation import gettext_lazy as _
 # Create your models here.
 class SessionYearModel(models.Model):
     id=models.AutoField(primary_key=True)
     session_start_year=models.DateField()
     session_end_year=models.DateField()
-    object=models.Manager()
+    objects=models.Manager()
 
     class Meta:
         db_table = 'session_year_model'
 
 
 class CustomUser(AbstractUser):
-    user_type_data=((1,"HOD"),(2,"Staff"),(3,"Student"))
-    user_type=models.CharField(default=1,choices=user_type_data,max_length=10)
+    HOD=1
+    STAFF=2
+    STUDENT=3
+    user_type_data=((HOD,"HOD"),(STAFF,"Staff"),(STUDENT,"Student"),)
+
+    username = models.CharField(max_length=255)
+    email = models.EmailField(_("email address"),unique=True)
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    user_type=models.IntegerField(default=1,choices=user_type_data,max_length=10)
 
     class Meta:
         db_table = 'customuser'
@@ -81,10 +90,12 @@ class Subjects(models.Model):
         db_table = 'subjects'
 
 class Students(models.Model):
+    StudentFileUploadFolder ="students"
+
     id=models.AutoField(primary_key=True)
     admin=models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     gender=models.CharField(max_length=255)
-    profile_pic=models.FileField()
+    profile_pic=models.FileField(upload_to="students")
     address=models.TextField()
     course_id=models.ForeignKey(Courses,on_delete=models.DO_NOTHING)
     session_year_id=models.ForeignKey(SessionYearModel,on_delete=models.CASCADE)
@@ -219,7 +230,7 @@ def create_user_profile(sender,instance,created,**kwargs):
         if instance.user_type == 2:
             Staffs.objects.create(admin=instance,address="")
         if instance.user_type==3:
-            Students.objects.create(admin=instance,course_id=Courses.objects.get(id=1),session_year_id=SessionYearModel.object.get(id=1),address="",profile_pic="",gender="")
+            Students.objects.create(admin=instance,course_id=Courses.objects.get(id=1),session_year_id=SessionYearModel.objects.get(id=1),address="",profile_pic="",gender="")
 
 
 @receiver(post_save,sender=CustomUser)

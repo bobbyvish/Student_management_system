@@ -10,14 +10,14 @@ def index(request):
 
 def Login(request):
     if request.method == 'POST':
-        username=request.POST.get('email')
+        email=request.POST.get('email')
         password=request.POST.get('password')
-        user=EmailBackEnd.authenticate(request,username=username,password=password)
-        if user!=None:
+        user=EmailBackEnd.authenticate(request,email=email,password=password)
+        if user:
             login(request,user)
-            if user.user_type=="1":
+            if user.user_type==1:
                 return HttpResponseRedirect("/admin_home")
-            elif user.user_type=="2":
+            elif user.user_type==2:
                 return HttpResponseRedirect(reverse('staff_home'))
             else:
                 return HttpResponseRedirect(reverse('student_home'))

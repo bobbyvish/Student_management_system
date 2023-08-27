@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
-
+import datetime 
 
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'student_management_app',
     'debug_toolbar',
+    "django_extensions",
+    'rest_framework',
+    "rest_framework_simplejwt",
+    "django_filters"
 ]
 
 MIDDLEWARE = [
@@ -86,6 +90,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'student_management_system.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
+
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -96,7 +107,7 @@ DATABASES = {
         'NAME': 'student_management_system',
         'HOST': '127.0.0.1',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'root',
         'PORT': '3306',
     }
 }
@@ -121,12 +132,45 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=50),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": "",
+    "AUDIENCE": None,
+    "ISSUER": None,
+    "JSON_ENCODER": None,
+    "JWK_URL": None,
+    "LEEWAY": 0,
+
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+
+    "JTI_CLAIM": "jti"
+
+}
+
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -142,9 +186,9 @@ MEDIA_URL="/media/"
 MEDIA_ROOT=os.path.join(BASE_DIR,"media")
 
 STATIC_URL="/static/"
-# STATICFILES_DIRS = [
-#     BASE_DIR.joinpath('static')
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR.joinpath('static')
+]
 
 
 AUTH_USER_MODEL="student_management_app.CustomUser"
@@ -154,3 +198,54 @@ AUTHENTICATION_BACKENDS =["student_management_app.EmailBackEnd.EmailBackEnd"]
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+
+import colorlog
+LOGGING = {
+    "version" : 1,
+    "disable_existing_loggers": False,
+    "formatters" : {
+        "colored": {
+            "()": colorlog.ColoredFormatter,
+            "format": "%(cyan)s%(asctime)s%(reset)s | %(red)s[%(levelname)8s]%(reset)s  |  [ %(yellow)s%(name)s.%(module)s:%(red)s%(lineno)d%(reset)s - %(green)s%(funcName)10s()%(reset)s ] -->  %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+            "log_colors": {
+                "DEBUG": "white",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "bold_red",
+            },
+            "secondary_log_colors": {},
+            "style": "%",
+        }
+    },
+    "handlers": {
+        "console" : {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "colored",
+        },
+        # "file": {
+        #     "level": "INFO",
+        #     "class": "logging.handlers.RotatingFileHandler",
+        #     "filename": "file.log",
+        #     "maxBytes": 10485760, #10MB
+        #     "backupCount": 10, #if file size reach 10mb then it will create new one and keep 10 backup file
+        #     "formatter": "verbose",
+        # }
+    },
+    "root": {"level": "DEBUG", "handlers": ["console"]},
+    # "loggers":{
+    #     "django":{
+    #         "handlers": ["console", "file"],
+    #         "level": "INFO",
+    #         "propagate": True,
+    #     },
+    #     "myapp": {
+    #         "handlers": ["console", "file"],
+    #         "level": "DEBUG",
+    #         "propagate": True,
+    #     }
+    # }
+
+}

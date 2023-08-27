@@ -10,12 +10,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Max, F, OuterRef, Subquery, Prefetch, OuterRef, Count ,Q , Case , When ,Value , Sum
 from django.db.models.functions import Coalesce
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .mixins import AdminRequiredMixin, StaffRequiredMixin
+from student_management_app.mixins import AdminRequiredMixin, StaffRequiredMixin
 from django.views.generic import View
 from django.views.generic.edit import CreateView
 from django.contrib.messages.views import SuccessMessageMixin
-from .models import CustomUser,Courses, FeedBackStaffs, FeedBackStudent, LeaveReportStaff, LeaveReportStudent,Staffs,Subjects,Students,SessionYearModel,Attendance,AttendanceReport
-from .forms import StaffsForm, CoursesForm, StudentsForm, SubjectsForm
+from student_management_app.models import CustomUser,Courses, FeedBackStaffs, FeedBackStudent, LeaveReportStaff, LeaveReportStudent,Staffs,Subjects,Students,SessionYearModel,Attendance,AttendanceReport
+from student_management_app.forms import StaffsForm, CoursesForm, StudentsForm, SubjectsForm
 from student_management_system.services import UploadServices
 from django.db import transaction
 
@@ -131,48 +131,46 @@ def AdminHome(request):
     return render(request, 'hod_template/home_content.html',context)
 
 
-def AddStaff(request):
-    if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        address = request.POST.get("address")
-        try:
-            user = CustomUser.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                last_name=last_name,
-                first_name=first_name,
-                user_type=2)
-            user.staffs.address = address
-            user.save()
-            messages.success(request, "Successfully Added Staff")
-            return HttpResponseRedirect(reverse("add_staff"))
-        except:
-            messages.error(request, "Failed to Add Staff")
-            return HttpResponseRedirect(reverse("add_staff"))
-    else:
-        return render(request, 'hod_template/add_staff.html')
-  
-        
+from django import forms
+class CreateStaffView(LoginRequiredMixin,AdminRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Staffs
+    template_name = 'hod_template/add_staff.html'
+    form_class = StaffsForm
+    success_url = reverse_lazy("add_staff")
+    success_message = "The staff member had been added successfully"
 
-def AddCourse(request):
-    if request.method == "POST":
-        course = request.POST.get("course")
+    def form_invalid(self, form):
+        messages.error(self.request,form.errors)
+        return super().form_invalid(form)
+    
+    def form_valid(self, form):
         try:
-            course_model=Courses(course_name=course)
-            course_model.save()
-            messages.success(request, "Course added successfully")
-            return HttpResponseRedirect(reverse("add_course"))
-        except:
-            messages.error(request, "Failed to Add Course")
-            return HttpResponseRedirect(reverse("add_course"))
-    else:
-        return render(request, 'hod_template/add_course.html')
+            response = super().form_valid(form)
+        except forms.ValidationError as e:
+            messages.error(self.request, e.message)
+            return self.form_invalid(form)
+        return response
 
+    # def get(self,request):
+    #     return render(request,self.template_name)
+    
+    # def post(self,request):
+    #     form = self.form_class(request.POST)
+    #     if not form.is_valid():
+    #         messages.error(request, form.errors)
+    #         return render(request,self.template_name)
+
+    #     form.save()
+    #     messages.success(request, "The staff member has been added successfully.")
+    #     return HttpResponseRedirect(self.success_url)
+    
+class CreateCourseView(LoginRequiredMixin, AdminRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Courses
+    # fields = ["course_name"]
+    form_class = CoursesForm
+    template_name = 'hod_template/add_course.html'
+    success_url = reverse_lazy('add_course')
+    success_message = "The course had been added successfully"
 
 
 @transaction.atomic
@@ -253,6 +251,27 @@ def AddStudent(request):
         course=Courses.objects.all()
         session_year=SessionYearModel.objects.all()
         return render(request, 'hod_template/add_student.html',{"courses":course,"session_years":session_year})
+
+
+class CreateSubjectView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = Subjects
+    form_class = SubjectsForm
+    template_name = "hod_template/add_subject.html"
+    success_url = reverse_lazy("add_subject")
+    success_message = "The subject had been added successfully"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        courses=Courses.objects.all()
+        staffs=CustomUser.objects.filter(user_type=2)
+        context["courses"] = courses
+        context["staffs"] = staffs
+        logger.debug(f"context {context}")
+        return context
+    
+    def form_invalid(self, form):
+        messages.error(self.request,form.errors)
+        return super().form_invalid(form)  
 
 def AddSubject(request):
     if request.method == "POST":
